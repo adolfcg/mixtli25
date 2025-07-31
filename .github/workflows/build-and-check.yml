@@ -60,7 +60,7 @@ jobs:
       - name: Push Docker image to ECR
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          ECR_URI="$ACCOUNT_ID.dkr.ecr.${{ env.AWS_REGION || 'us-east-1' }}.amazonaws.com/repo-demo"
+          ECR_URI="$ACCOUNT_ID.dkr.ecr.${{ env.AWS_REGION || 'us-east-1' }}.amazonaws.com/demo-repo"
 
           echo "Tagging Docker image as: $ECR_URI:latest"
           docker tag vuln-app:latest $ECR_URI:latest

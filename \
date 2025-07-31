@@ -1,0 +1,41 @@
+name: Code Check & Docker Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout your repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Python for linting and SAST
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Install security tools and requirements
+      - name: Install security tools and app dependencies
+        run: |
+          pip install bandit semgrep
+          pip install -r requirements.txt
+
+      # Run Bandit (SAST)
+      - name: Run Bandit
+        run: bandit -r vuln_app.py
+
+      # Run Semgrep
+      - name: Run Semgrep
+        run: semgrep --config p/python vuln_app.py
+
+      # Build Docker image
+      - name: Build Docker image
+        run: |
+          echo "Building Docker image for vuln_app..."
+          docker build -t vuln-app:latest .

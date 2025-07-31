@@ -1,4 +1,4 @@
-flask==2.3.2
+flask
 langflow==1.2.0  # Vulnerable version for testing CVE-2025-3248
 
 

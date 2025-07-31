@@ -1,4 +1,4 @@
-name: Code Check & Docker Build
+name: Code Check & Docker Builder
 
 on:
   push:

@@ -33,7 +33,8 @@ jobs:
 
       # Run Semgrep
       - name: Run Semgrep
-        run: semgrep --config p/python vuln_app.py
+        run: semgrep --config=auto --output=semgrep-report.txt .
+             cat semgrep-report.txt
         continue-on-error: true
 
       # Build Docker image
@@ -42,3 +43,27 @@ jobs:
           echo "Building Docker image for vuln_app..."
           docker build -t vuln-app:latest .
 
+      # **Authenticate to AWS**
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1   #
+
+      # **Login to Amazon ECR**
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # **Tag and push Docker image to ECR**
+      - name: Push Docker image to ECR
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          ECR_URI="$ACCOUNT_ID.dkr.ecr.${{ env.AWS_REGION || 'us-east-1' }}.amazonaws.com/repo-demo"
+
+          echo "Tagging Docker image as: $ECR_URI:latest"
+          docker tag vuln-app:latest $ECR_URI:latest
+
+          echo "Pushing Docker image to ECR..."
+          docker push $ECR_URI:latest
